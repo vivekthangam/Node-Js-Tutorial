@@ -1,0 +1,22 @@
+[{
+        "name": "republicans",
+        "participant_id": "5fdb7ea68891a03f48f7b856",
+        "receipant_id": "5fdb7eca8891a03f48f7b858"
+
+    },
+    {
+        "name": "democrats",
+        "participant_id": "5fdb7ea6v8891a03f48f7b856",
+        "receipant_id": "5fdb7eca8891a03f48f7b858"
+    },
+    {
+        "name": "independents",
+        "participant_id": "5fdb7ea68891a03f48f7b856",
+        "receipant_id": "5fdb7eca8891a03f48f7b858"
+    },
+    {
+        "name": "no politics",
+        "participant_id": "5fdb7ea68891a03f48f7b856",
+        "receipant_id": "5fdb7eca8891a03f48f7b858"
+    }
+]
