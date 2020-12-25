@@ -2,6 +2,8 @@ const User = require("../model/user.model");
 const asyncHandler = require("../middeware/aync");
 const createFilterQuery = require("../utils/createFilterQuery");
 const ErrorRespone = require("../utils/errorResponse");
+const userModel = require("../model/user.model");
+
 //@desc     Get all Users
 //@route    GET /api/v1/Users
 //@access   Public
@@ -46,11 +48,9 @@ exports.getUser = asyncHandler(async(req, res, next) => {
 //@access   Public
 exports.createUser = asyncHandler(async(req, res, next) => {
     const _User = await User.create(req.body);
-    res.status(201).json({
-        sucess: true,
-        data: _User,
-        msg: "Create new Users",
-    });
+
+
+    sendTokenResponse(_user, 200, res);
 });
 
 //@desc     Update Single Users
@@ -66,9 +66,11 @@ exports.updateUser = asyncHandler(async(req, res, next) => {
         next(err);
     }
 
+
     res.status(200).json({
         sucess: false,
         data: _User,
+        token: token,
         msg: `Show User ${req.params.id}`,
     });
 });
@@ -113,4 +115,73 @@ exports.UploadPhotoForUser = asyncHandler(async(req, res, next) => {
         data: "_User",
         msg: `Show User ${req.params.id}`,
     });
+});
+
+
+
+
+//@desc     Login User
+//@route    GET /api/v1/Users/login
+//@access   Public
+exports.login = asyncHandler(async(req, res, next) => {
+    console.log("funct")
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return next(new ErrorRespone('please provide an email and password', 400));
+    }
+
+    const _user = await User.findOne({ email }).select('+password');
+
+    if (!_user) {
+        return next(new ErrorRespone('Invalid credentials', 400));
+    }
+
+    //check if password matches
+    const isMatch = await _user.matchPassword(password);
+    console.log(isMatch)
+    if (!isMatch) {
+        return next(new ErrorRespone('Invalid credentials', 400));
+
+    }
+    sendTokenResponse(_user, 200, res);
+});
+
+const sendTokenResponse = (User, statusCode, res) => {
+
+    const token = User.getSignedJwtToken();
+    console.log(process.env.JWT_COOKIE_EXPIRE);
+    console.log(token)
+    const options = {
+        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
+
+        httpOnly: true
+    }
+
+    res
+        .status(statusCode)
+        .cookie('token', token, options)
+        .json({
+            success: true,
+            token
+        });
+}
+
+
+
+
+
+
+//@desc     Get logged in User
+//@route    GET /api/v1/Users/me
+//@access   Private
+exports.getMe = asyncHandler(async(req, res, next) => {
+    console.log(req.user)
+    const _User = await User.findById(req.user.id);
+    res
+        .status(200)
+        .json({
+            success: true,
+            _User
+        });
 });

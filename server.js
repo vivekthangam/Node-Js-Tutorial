@@ -1,7 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
-
+var cookieParser = require('cookie-parser');
 //file upload
 const multer = require("multer");
 const uuid = require("uuid").v4;
@@ -23,15 +23,21 @@ const createRoutes = require("./app/routes/index")
 var path = require('path');
 
 
+
 //creating express server
 const app = express();
+//Cookie Parser
+app.use(cookieParser());
+app.use(express.static('./app/views'));
 
-app.use(express.static('./app/views'))
-    //File Upload Middleware
+
+//File Upload Middleware
 app.use(fileUpload());
 
-app.use(express.json())
-app.use(cors())
+app.use(express.json());
+
+
+app.use(cors());
 
 
 Mongodb();

@@ -1,18 +1,41 @@
 var mongoose = require('mongoose');
+const { stringify } = require('uuid');
 const { use } = require('../routes/todo.routes');
 var geocoder = require("../utils/geocoder")
-require('./todo.model')
+
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken")
 var UserSchema = new mongoose.Schema({
-    username: String,
+    username: {
+        type: String,
+        required: [true, "Please add user name"]
+    },
     email: {
         type: String,
         required: [true, "Please add email id"],
+        match: [/^\w+([\.-]?\w)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+            "Please add a valid email id"
+        ],
         unique: true
     },
     phone: {
         type: Number,
         unique: true,
     },
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
+    },
+    password: {
+        type: String,
+        required: [true, "please add password"],
+        minlength: 6,
+        select: false
+
+    },
+    resetPasswordToken: String,
+    resetpasswordExpire: Date,
     bio: String,
     image: String,
     hash: String,
@@ -74,4 +97,24 @@ UserSchema.virtual('ToDos', {
     next();
 })*/
 
+///Hash pPassword
+UserSchema.pre('save', async function(next) {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt)
+});
+
+// Sign JWT and return
+UserSchema.methods.getSignedJwtToken = function() {
+    return jwt.sign({
+        id: this._id
+
+    }, process.env.JWT_SECRECT, {
+        expiresIn: process.env.JWT_EXPIRE
+    })
+}
+
+//Match User entered password to hashed passwordin database
+UserSchema.methods.matchPassword = async function(enterdPassword) {
+    return await bcrypt.compare(enterdPassword, this.password)
+}
 module.exports = mongoose.model('User', UserSchema);
