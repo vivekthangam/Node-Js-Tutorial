@@ -1,10 +1,12 @@
 var mongoose = require('mongoose');
+const crypto = require("crypto");
 const { stringify } = require('uuid');
 const { use } = require('../routes/todo.routes');
 var geocoder = require("../utils/geocoder")
 
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
+const { token } = require('morgan');
 var UserSchema = new mongoose.Schema({
     username: {
         type: String,
@@ -99,6 +101,9 @@ UserSchema.virtual('ToDos', {
 
 ///Hash pPassword
 UserSchema.pre('save', async function(next) {
+    if (!this.isModified('password')) {
+        next()
+    }
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt)
 });
@@ -117,4 +122,17 @@ UserSchema.methods.getSignedJwtToken = function() {
 UserSchema.methods.matchPassword = async function(enterdPassword) {
     return await bcrypt.compare(enterdPassword, this.password)
 }
+
+
+//Generate abd hash password token
+UserSchema.methods.getResetPasswordToken = async function(enterdPassword) {
+    const resetToekn = crypto.randomBytes(20).toString('hex');
+
+    //Hash token and set to resetTokenPassword field
+    this.resetPasswordToken = crypto.createHash('sha256').update(resetToekn).digest('hex');
+    //set Expires
+    this.resetpasswordExpire = Date.now() + 10 * 60 * 1000;
+    return resetToekn;
+}
+
 module.exports = mongoose.model('User', UserSchema);

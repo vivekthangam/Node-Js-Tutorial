@@ -7,9 +7,9 @@ const multer = require("multer");
 const uuid = require("uuid").v4;
 const fileUpload = require('express-fileupload');
 const upload = multer({ dest: 'uploads/' })
-
-//Socket io 
-// const server = require('http').createServer()
+const mongoSanitize = require("express-mongo-sanitize")
+    //Socket io 
+    // const server = require('http').createServer()
 
 
 //Load env vars
@@ -28,6 +28,8 @@ var path = require('path');
 const app = express();
 //Cookie Parser
 app.use(cookieParser());
+
+app.use(mongoSanitize);
 app.use(express.static('./app/views'));
 
 
@@ -35,7 +37,6 @@ app.use(express.static('./app/views'));
 app.use(fileUpload());
 
 app.use(express.json());
-
 
 app.use(cors());
 

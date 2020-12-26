@@ -2,7 +2,6 @@ const User = require("../model/user.model");
 const asyncHandler = require("../middeware/aync");
 const createFilterQuery = require("../utils/createFilterQuery");
 const ErrorRespone = require("../utils/errorResponse");
-const userModel = require("../model/user.model");
 
 //@desc     Get all Users
 //@route    GET /api/v1/Users
@@ -47,7 +46,8 @@ exports.getUser = asyncHandler(async(req, res, next) => {
 //@route    POST /api/v1/Users
 //@access   Public
 exports.createUser = asyncHandler(async(req, res, next) => {
-    const _User = await User.create(req.body);
+    console.log("vvvv")
+    const _user = await User.create(req.body);
 
 
     sendTokenResponse(_user, 200, res);
@@ -106,7 +106,7 @@ exports.UploadPhotoForUser = asyncHandler(async(req, res, next) => {
         next(err);
     }
     if (!req.files) {
-        next(new ErrorRespone(`Please upload a file`, 400))
+        next(new ErrorRespone(`Please upload a file`, 400));
     }
     console.log(req.files)
 

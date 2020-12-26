@@ -63,7 +63,7 @@ todoSchema.post('save', function() {
 });
 todoSchema.pre('remove', function(next) {
     this.constructor.getAvgAmt(this.user_id)
-        // next();
+    next();
 })
 
 module.exports = mongoose.model("ToDo", todoSchema);
